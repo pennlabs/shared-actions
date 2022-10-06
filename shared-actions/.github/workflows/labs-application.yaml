@@ -1,0 +1,66 @@
+name: Deployment Workflow
+on:
+  workflow_call:
+    inputs:
+      # Mandatory inputs
+      projectName:
+        required: true
+        type: string
+      backendImageName:
+        required: TRUE
+        type: string
+      frontendImageName:
+        required: TRUE
+        type: string
+      imageName:
+        required: TRUE
+        type: string
+      # Optional finetuning inputs
+      defaultBranch:
+        required: False
+        type: string
+        default: master
+      deployTag:
+        required: False
+        type: string
+        default: ${{ github.sha }}
+    secrets:
+      AWS_ACCOUNT_ID:
+        required: true
+      GH_AWS_ACCESS_KEY_ID:
+        required: true
+      GH_AWS_SECRET_ACCESS_KEY:
+        required: true
+jobs:
+  django:
+    name: Django
+    uses: pennlabs/shared-actions/.github/workflows/django.yml@master
+    with:
+      projectName: ${{ inputs.projectName }}
+      imageName: ${{ inputs.backendImageName }}
+      defaultBranch: ${{ inputs.defaultBranch }}
+      path: backend
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  react:
+    name: React
+    uses: pennlabs/shared-actions/.github/workflows/react.yml@master
+    with:
+      projectName: ${{ inputs.projectName }}
+      imageName: ${{ inputs.frontendImageName }}
+      defaultBranch: ${{ inputs.defaultBranch }}
+      path: frontend
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  deployment:
+    name: Deploy
+    uses: pennlabs/shared-actions/.github/workflows/deployment.yml@master
+    secrets:
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      GH_AWS_ACCESS_KEY_ID: ${{ secrets.GH_AWS_ACCESS_KEY_ID }}
+      GH_AWS_SECRET_ACCESS_KEY: ${{ secrets.GH_AWS_SECRET_ACCESS_KEY }}
+    needs:
+      - react
+      - django
