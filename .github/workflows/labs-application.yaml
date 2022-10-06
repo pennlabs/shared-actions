@@ -24,6 +24,10 @@ on:
         required: False
         type: string
         default: ${{ github.sha }}
+      skipChecks: # NOTE: Use with CAUTION!
+        required: False
+        type: boolean
+        default: false
     secrets:
       AWS_ACCOUNT_ID:
         required: true
@@ -39,6 +43,7 @@ jobs:
       projectName: ${{ inputs.projectName }}
       imageName: ${{ inputs.backendImageName }}
       defaultBranch: ${{ inputs.defaultBranch }}
+      skipDjangoCheck: ${{ inputs.skipChecks }}
       path: backend
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -50,6 +55,7 @@ jobs:
       projectName: ${{ inputs.projectName }}
       imageName: ${{ inputs.frontendImageName }}
       defaultBranch: ${{ inputs.defaultBranch }}
+      skipReactCheck: ${{ inputs.skipChecks }}
       path: frontend
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
