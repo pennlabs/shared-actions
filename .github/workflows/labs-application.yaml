@@ -34,7 +34,7 @@ on:
 jobs:
   django:
     name: Django
-    uses: pennlabs/shared-actions/.github/workflows/django.yml@main
+    uses: pennlabs/shared-actions/.github/workflows/django.yaml@main
     with:
       projectName: ${{ inputs.projectName }}
       imageName: ${{ inputs.backendImageName }}
@@ -45,7 +45,7 @@ jobs:
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
   react:
     name: React
-    uses: pennlabs/shared-actions/.github/workflows/react.yml@main
+    uses: pennlabs/shared-actions/.github/workflows/react.yaml@main
     with:
       projectName: ${{ inputs.projectName }}
       imageName: ${{ inputs.frontendImageName }}
@@ -56,7 +56,7 @@ jobs:
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
   deployment:
     name: Deploy
-    uses: pennlabs/shared-actions/.github/workflows/deployment.yml@main
+    uses: pennlabs/shared-actions/.github/workflows/deployment.yaml@main
     secrets:
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
       GH_AWS_ACCESS_KEY_ID: ${{ secrets.GH_AWS_ACCESS_KEY_ID }}
