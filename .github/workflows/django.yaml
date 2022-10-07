@@ -38,6 +38,11 @@ on:
         required: False
         type: boolean
         default: True
+    secrets:
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_PASSWORD:
+        required: true
 jobs:
   django-check:
     name: Django Check
