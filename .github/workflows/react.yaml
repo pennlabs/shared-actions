@@ -3,11 +3,11 @@ on:
   workflow_call:
     inputs:
       # Mandatory inputs
-      projectName:
-        required: true
-        type: string
       imageName:
         required: TRUE
+        type: string
+      githubRef:
+        required: true
         type: string
       # Optional finetuning inputs
       defaultBranch:
@@ -87,7 +87,7 @@ jobs:
         with:
           context: ${{ inputs.path }}
           file: ${{ inputs.path }}/Dockerfile
-          push: ${{ github.ref == 'refs/heads/${{ inputs.defaultBranch }}' }}
+          push: ${{ ${{ inputs.githubRef }} == 'refs/heads/${{ inputs.defaultBranch }}' }}
           cache-from: type=local,src=/tmp/.buildx-cache,type=registry,ref=pennlabs/${{ inputs.imageName }}:latest
           cache-to: type=local,dest=/tmp/.buildx-cache
           tags: pennlabs/${{ inputs.imageName }}:latest,pennlabs/${{ inputs.imageName }}:${{ github.sha }}

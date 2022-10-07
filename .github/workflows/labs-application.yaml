@@ -44,6 +44,7 @@ jobs:
       imageName: ${{ inputs.backendImageName }}
       defaultBranch: ${{ inputs.defaultBranch }}
       skipDjangoCheck: ${{ inputs.skipChecks }}
+      githubRef: ${{ github.ref }}
       path: backend
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -56,6 +57,7 @@ jobs:
       imageName: ${{ inputs.frontendImageName }}
       defaultBranch: ${{ inputs.defaultBranch }}
       skipReactCheck: ${{ inputs.skipChecks }}
+      githubRef: ${{ github.ref }}
       path: frontend
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -63,6 +65,10 @@ jobs:
   deployment:
     name: Deploy
     uses: pennlabs/shared-actions/.github/workflows/deployment.yaml@main
+    with:
+      githubRef: ${{ github.ref }}
+      defaultBranch: ${{ inputs.defaultBranch }}
+      deployTag: ${{ inputs.deployTag }}
     secrets:
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
       GH_AWS_ACCESS_KEY_ID: ${{ secrets.GH_AWS_ACCESS_KEY_ID }}

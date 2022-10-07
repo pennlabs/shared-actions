@@ -2,6 +2,10 @@ name: Deployment Workflow
 on:
   workflow_call:
     inputs:
+      # Mandatory inputs
+      githubRef:
+        required: true
+        type: string
       # Optional finetuning inputs
       defaultBranch:
         required: False
@@ -21,7 +25,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/${{ inputs.defaultBranch }}'
+    if: ${{ inputs.githubRef }} == 'refs/heads/${{ inputs.defaultBranch }}'
     steps:
       - uses: actions/checkout@v2
       - id: synth
