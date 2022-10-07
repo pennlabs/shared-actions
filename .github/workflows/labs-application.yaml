@@ -51,7 +51,6 @@ jobs:
     name: React
     uses: pennlabs/shared-actions/.github/workflows/react.yaml@main
     with:
-      projectName: ${{ inputs.projectName }}
       imageName: "${{ inputs.dockerImageBaseName }}-frontend"
       defaultBranch: ${{ inputs.defaultBranch }}
       skipReactCheck: ${{ inputs.skipChecks }}
