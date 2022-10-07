@@ -3,7 +3,7 @@ on:
   workflow_call:
     inputs:
       # Mandatory inputs
-      projectName:
+      djangoProjectName:
         required: true
         type: string
       dockerImageBaseName:
@@ -38,7 +38,7 @@ jobs:
     name: Django
     uses: pennlabs/shared-actions/.github/workflows/django.yaml@main
     with:
-      projectName: ${{ inputs.projectName }}
+      projectName: ${{ inputs.djangoProjectName }}
       imageName: "${{ inputs.dockerImageBaseName }}-backend"
       defaultBranch: ${{ inputs.defaultBranch }}
       skipDjangoCheck: ${{ inputs.skipChecks }}
