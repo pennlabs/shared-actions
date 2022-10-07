@@ -60,6 +60,10 @@ jobs:
   publish-frontend:
     name: Publish frontend
     runs-on: ubuntu-latest
+    needs: react-check
+    if: |
+      always() &&
+      (needs.react-check.result == 'success' || needs.react-check.result == 'skipped')
     steps:
       - uses: actions/checkout@v2
       - uses: docker/setup-qemu-action@v1
@@ -82,4 +86,3 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache,type=registry,ref=pennlabs/${{ inputs.imageName }}:latest
           cache-to: type=local,dest=/tmp/.buildx-cache
           tags: pennlabs/${{ inputs.imageName }}:latest,pennlabs/${{ inputs.imageName }}:${{ github.sha }}
-    needs: react-check
