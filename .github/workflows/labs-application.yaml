@@ -6,14 +6,8 @@ on:
       projectName:
         required: true
         type: string
-      backendImageName:
-        required: TRUE
-        type: string
-      frontendImageName:
-        required: TRUE
-        type: string
-      imageName:
-        required: TRUE
+      dockerImageBaseName:
+        required: true
         type: string
       # Optional finetuning inputs
       defaultBranch:
@@ -29,6 +23,10 @@ on:
         type: boolean
         default: false
     secrets:
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_PASSWORD:
+        required: true
       AWS_ACCOUNT_ID:
         required: true
       GH_AWS_ACCESS_KEY_ID:
@@ -41,7 +39,7 @@ jobs:
     uses: pennlabs/shared-actions/.github/workflows/django.yaml@main
     with:
       projectName: ${{ inputs.projectName }}
-      imageName: ${{ inputs.backendImageName }}
+      imageName: "${{ inputs.dockerImageBaseName }}-backend"
       defaultBranch: ${{ inputs.defaultBranch }}
       skipDjangoCheck: ${{ inputs.skipChecks }}
       githubRef: ${{ github.ref }}
@@ -54,7 +52,7 @@ jobs:
     uses: pennlabs/shared-actions/.github/workflows/react.yaml@main
     with:
       projectName: ${{ inputs.projectName }}
-      imageName: ${{ inputs.frontendImageName }}
+      imageName: "${{ inputs.dockerImageBaseName }}-frontend"
       defaultBranch: ${{ inputs.defaultBranch }}
       skipReactCheck: ${{ inputs.skipChecks }}
       githubRef: ${{ github.ref }}
