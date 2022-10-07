@@ -18,6 +18,10 @@ on:
         required: False
         type: string
         default: .
+      dockerfile:
+        required: False
+        type: string
+        default: Dockerfile
       skipReactCheck: # NOTE: Use with CAUTION!
         required: False
         type: boolean
@@ -86,7 +90,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: ${{ inputs.path }}
-          file: ${{ inputs.path }}/Dockerfile
+          file: ${{ inputs.path }}/${{ inputs.dockerfile }}
           push: ${{ inputs.githubRef == 'refs/heads/${{ inputs.defaultBranch }}' }}
           cache-from: type=local,src=/tmp/.buildx-cache,type=registry,ref=pennlabs/${{ inputs.imageName }}:latest
           cache-to: type=local,dest=/tmp/.buildx-cache
