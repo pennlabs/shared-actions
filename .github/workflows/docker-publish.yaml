@@ -34,7 +34,7 @@ on:
       tags:
         required: False
         type: string
-        default: latest,${{ github.sha }}
+        default: pennlabs/${{ inputs.imageName }}:latest,pennlabs/${{ inputs.imageName }}:${{ github.sha }}
       # If enabled, will cache_from the latest version of the docker image.
       cache:
         required: False
@@ -70,5 +70,4 @@ jobs:
           push: ${{ inputs.push }}
           cache-from: ${{ inputs.cache && 'type=local,src=/tmp/.buildx-cache,type=registry,ref=pennlabs/${{ inputs.imageName }}:latest' }}
           cache-to: ${{ inputs.cache && 'type=local,dest=/tmp/.buildx-cache' }}
-          # tags: ${{ join(inputs.tags.split(',').map(tag => 'pennlabs/${{ inputs.imageName }}:' + tag), ',') }}
-          tags: ${{ fromJSON(inputs.tags).map(tag => 'pennlabs/${{ inputs.imageName }}:' + tag).join(',') }}
+          tags: ${{ inputs.tags }}
