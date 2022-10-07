@@ -14,14 +14,18 @@ on:
         required: False
         type: string
         default: master
+      path:
+        required: False
+        type: string
+        default: .
+      skipDjangoCheck: # NOTE: Use with CAUTION!
+        required: False
+        type: boolean
+        default: false
       pythonVersion:
         required: False
         type: string
         default: 3.8-buster
-      path:
-        required: False
-        type: string
-        default: . # TODO: sub w backend
       # Linting config
       flake:
         required: False
@@ -35,6 +39,7 @@ jobs:
   django-check:
     name: Django Check
     runs-on: ubuntu-latest
+    if: ${{ !inputs.skipDjangoCheck }}
     steps:
       - uses: actions/checkout@v2
       - name: Cache
