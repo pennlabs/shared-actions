@@ -34,7 +34,7 @@ on:
       tags:
         required: False
         type: string
-        default: pennlabs/${{ inputs.imageName }}:latest,pennlabs/${{ inputs.imageName }}:${{ github.sha }}
+        default: latest,${{ github.sha }}
       # If enabled, will cache_from the latest version of the docker image.
       cache:
         required: False
@@ -62,6 +62,10 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Get image tags
+        id: image_tags
+        run: |
+          echo "::set-output name=tags::${{ join(inputs.tags.split(',').map(tag => 'pennlabs/${{ inputs.imageName }}:' + tag), ',') }}"
       - name: Build/Publish
         uses: docker/build-push-action@v2
         with:
@@ -70,4 +74,4 @@ jobs:
           push: ${{ inputs.push }}
           cache-from: ${{ inputs.cache && 'type=local,src=/tmp/.buildx-cache,type=registry,ref=pennlabs/${{ inputs.imageName }}:latest' }}
           cache-to: ${{ inputs.cache && 'type=local,dest=/tmp/.buildx-cache' }}
-          tags: ${{ inputs.tags }}
+          tags: ${{ steps.image_tags.outputs.tags }}
