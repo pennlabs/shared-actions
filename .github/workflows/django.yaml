@@ -12,6 +12,9 @@ on:
       githubRef:
         required: true
         type: string
+      gitSha:
+        required: true
+        type: string
       # Optional finetuning inputs
       defaultBranch:
         required: False
@@ -120,4 +123,4 @@ jobs:
           push: ${{ inputs.githubRef == 'refs/heads/${{ inputs.defaultBranch }}' }}
           cache-from: type=local,src=/tmp/.buildx-cache,type=registry,ref=pennlabs/${{ inputs.imageName }}:latest
           cache-to: type=local,dest=/tmp/.buildx-cache
-          tags: pennlabs/${{ inputs.imageName }}:latest,pennlabs/${{ inputs.imageName }}:${{ github.sha }}
+          tags: pennlabs/${{ inputs.imageName }}:latest,pennlabs/${{ inputs.imageName }}:${{ inputs.gitSha }}

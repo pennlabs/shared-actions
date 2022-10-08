@@ -6,6 +6,9 @@ on:
       githubRef:
         required: true
         type: string
+      gitSha:
+        required: true
+        type: string
       # Optional finetuning inputs
       defaultBranch:
         required: False
@@ -14,7 +17,7 @@ on:
       deployTag:
         required: False
         type: string
-        default: ${{ github.sha }}
+        default: ${{ inputs.gitSha }}
     secrets:
       AWS_ACCOUNT_ID:
         required: true

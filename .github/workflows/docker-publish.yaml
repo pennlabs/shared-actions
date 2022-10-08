@@ -10,6 +10,9 @@ on:
       githubRef:
         required: true
         type: string
+      gitSha:
+        required: true
+        type: string
       # Optional finetuning inputs
       defaultBranch:
         required: False
@@ -34,7 +37,7 @@ on:
       tags:
         required: False
         type: string
-        default: latest,${{ github.sha }}
+        default: latest,${{ inputs.gitSha }}
       # If enabled, will cache_from the latest version of the docker image.
       cache:
         required: False

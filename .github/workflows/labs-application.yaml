@@ -9,6 +9,12 @@ on:
       dockerImageBaseName:
         required: true
         type: string
+      githubRef:
+        required: true
+        type: string
+      gitSha:
+        required: true
+        type: string
       # Optional finetuning inputs
       defaultBranch:
         required: False
@@ -42,7 +48,8 @@ jobs:
       imageName: "${{ inputs.dockerImageBaseName }}-backend"
       defaultBranch: ${{ inputs.defaultBranch }}
       skipDjangoCheck: ${{ inputs.skipChecks }}
-      githubRef: ${{ github.ref }}
+      githubRef: ${{ inputs.githubRef }}
+      gitSha: ${{ inputs.gitSha }}
       path: backend
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -54,7 +61,8 @@ jobs:
       imageName: "${{ inputs.dockerImageBaseName }}-frontend"
       defaultBranch: ${{ inputs.defaultBranch }}
       skipReactCheck: ${{ inputs.skipChecks }}
-      githubRef: ${{ github.ref }}
+      githubRef: ${{ inputs.githubRef }}
+      gitSha: ${{ inputs.gitSha }}
       path: frontend
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -63,7 +71,8 @@ jobs:
     name: Deploy
     uses: pennlabs/shared-actions/.github/workflows/deployment.yaml@main
     with:
-      githubRef: ${{ github.ref }}
+      githubRef: ${{ inputs.githubRef }}
+      gitSha: ${{ inputs.gitSha }}
       defaultBranch: ${{ inputs.defaultBranch }}
       deployTag: ${{ inputs.deployTag }}
     secrets:
