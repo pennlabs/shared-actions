@@ -14,10 +14,6 @@ on:
         required: False
         type: string
         default: master
-      deployTag:
-        required: False
-        type: string
-        default: ${{ inputs.gitSha }}
     secrets:
       AWS_ACCOUNT_ID:
         required: true
@@ -45,7 +41,7 @@ jobs:
 
           yarn build
         env:
-          GIT_SHA: ${{ inputs.deployTag }}
+          GIT_SHA: ${{ inputs.gitSha }}
           REPOSITORY: ${{ github.repository }}
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
       - name: Deploy
