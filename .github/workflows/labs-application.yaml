@@ -66,10 +66,9 @@ jobs:
   deployment:
     name: Deploy
     uses: pennlabs/shared-actions/.github/workflows/deployment.yaml@main
+    if: ${{ inputs.githubRef }} == 'refs/heads/master'
     with:
-      githubRef: ${{ inputs.githubRef }}
       gitSha: ${{ inputs.gitSha }}
-      defaultBranch: ${{ inputs.defaultBranch }}
     secrets:
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
       GH_AWS_ACCESS_KEY_ID: ${{ secrets.GH_AWS_ACCESS_KEY_ID }}
