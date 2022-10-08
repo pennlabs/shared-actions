@@ -20,10 +20,6 @@ on:
         required: False
         type: string
         default: master
-      deployTag:
-        required: False
-        type: string
-        default: ${{ github.sha }}
       skipChecks: # NOTE: Use with CAUTION!
         required: False
         type: boolean
@@ -74,7 +70,6 @@ jobs:
       githubRef: ${{ inputs.githubRef }}
       gitSha: ${{ inputs.gitSha }}
       defaultBranch: ${{ inputs.defaultBranch }}
-      deployTag: ${{ inputs.deployTag }}
     secrets:
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
       GH_AWS_ACCESS_KEY_ID: ${{ secrets.GH_AWS_ACCESS_KEY_ID }}
