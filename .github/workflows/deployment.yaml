@@ -35,10 +35,6 @@ jobs:
           echo "::set-output name=RELEASE_NAME::$RELEASE_NAME"
 
           yarn build
-
-          # Display manifests for debugging
-          echo "Manifests:"
-          cat dist/*.yaml
         env:
           GIT_SHA: ${{ inputs.gitSha }}
           REPOSITORY: ${{ github.repository }}
