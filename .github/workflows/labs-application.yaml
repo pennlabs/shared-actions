@@ -16,10 +16,6 @@ on:
         required: true
         type: string
       # Optional finetuning inputs
-      defaultBranch:
-        required: False
-        type: string
-        default: master
       skipChecks: # NOTE: Use with CAUTION!
         required: False
         type: boolean
@@ -42,7 +38,6 @@ jobs:
     with:
       projectName: ${{ inputs.djangoProjectName }}
       imageName: "${{ inputs.dockerImageBaseName }}-backend"
-      defaultBranch: ${{ inputs.defaultBranch }}
       skipDjangoCheck: ${{ inputs.skipChecks }}
       githubRef: ${{ inputs.githubRef }}
       gitSha: ${{ inputs.gitSha }}
@@ -55,7 +50,6 @@ jobs:
     uses: pennlabs/shared-actions/.github/workflows/react.yaml@main
     with:
       imageName: "${{ inputs.dockerImageBaseName }}-frontend"
-      defaultBranch: ${{ inputs.defaultBranch }}
       skipReactCheck: ${{ inputs.skipChecks }}
       githubRef: ${{ inputs.githubRef }}
       gitSha: ${{ inputs.gitSha }}
@@ -69,7 +63,6 @@ jobs:
     if: ${{ inputs.githubRef }} == 'refs/heads/master'
     with:
       gitSha: ${{ inputs.gitSha }}
-      defaultBranch: ${{ inputs.defaultBranch }}
     secrets:
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
       GH_AWS_ACCESS_KEY_ID: ${{ secrets.GH_AWS_ACCESS_KEY_ID }}

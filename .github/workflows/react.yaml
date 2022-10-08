@@ -13,10 +13,6 @@ on:
         required: true
         type: string
       # Optional finetuning inputs
-      defaultBranch:
-        required: False
-        type: string
-        default: master
       path:
         required: False
         type: string
