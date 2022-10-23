@@ -1,0 +1,85 @@
+name: "Django Check"
+description: "Checks django as a composite action"
+
+
+inputs:
+      # Mandatory inputs
+      projectName:
+        required: true
+        type: string
+      imageName:
+        required: TRUE
+        type: string
+      githubRef:
+        required: true
+        type: string
+      gitSha:
+        required: true
+        type: string
+      # Optional finetuning inputs
+      path:
+        required: False
+        type: string
+        default: .
+      skipDjangoCheck: # NOTE: Use with CAUTION!
+        required: False
+        type: boolean
+        default: false
+      pythonVersion:
+        required: False
+        type: string
+        default: 3.8-buster
+      # Linting config
+      flake:
+        required: False
+        type: boolean
+        default: True
+      black:
+        required: False
+        type: boolean
+        default: True
+
+runs:
+  using: "composite"
+  steps:
+      - uses: actions/checkout@v2
+      - name: Cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.local/share/virtualenvs
+          key: v0-${{ hashFiles('${{ inputs.path }}/Pipfile.lock') }}
+      - name: Install Dependencies
+        run: |-
+          cd ${{ inputs.path }}
+          pip install pipenv
+          pipenv install --deploy --dev
+      - name: Lint (flake8)
+        run: |-
+          cd ${{ inputs.path }}
+          pipenv run flake8 .
+        if: ${{ inputs.flake }}
+      - name: Lint (black)
+        run: |-
+          cd ${{ inputs.path }}
+          pipenv run black --check .
+        if: ${{ inputs.black }}
+      - name: Test (run in parallel)
+        run: |-
+          cd ${{ inputs.path }}
+          pipenv run coverage run --concurrency=multiprocessing manage.py test --settings=${{ inputs.projectName }}.settings.ci --parallel
+          pipenv run coverage combine
+      - name: Upload Code Coverage
+        run: |-
+          ROOT=$(pwd)
+          cd ${{ inputs.path }}
+          pipenv run codecov --root $ROOT --flags ${{ inputs.path }}
+  container:
+      image: python:${{ inputs.pythonVersion }}
+  services:
+      postgres:
+        image: postgres:12
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+          POSTGRES_PASSWORD: postgres
+        options: "--health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5"
