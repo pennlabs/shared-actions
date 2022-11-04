@@ -1,0 +1,68 @@
+name: "Django Check Composite"
+description: "Checks django as a composite action"
+
+inputs:
+      # Mandatory inputs
+      projectName:
+        required: true
+        description: "Name of project"
+      # Optional finetuning inputs
+      path:
+        required: False
+        description: "path"
+        default: .
+      pythonVersion:
+        required: False
+        description: "Python version to use"
+        default: 3.8-buster
+      # Linting config
+      flake:
+        required: False
+        description: "whether to use flake for linting"
+        default: "true"
+      black:
+        required: False
+        description: "whether to use black for linting"
+        default: "true"
+
+runs:
+  using: "composite"
+  steps:
+      - uses: actions/checkout@v2
+      - name: Cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.local/share/virtualenvs
+          key: v0-${{ hashFiles('${{ inputs.path }}/Pipfile.lock') }}
+      - name: Install Dependencies
+        shell: bash
+        run: |-
+          cd ${{ inputs.path }}
+          pip install pipenv
+          pipenv install --deploy --dev
+      - name: Lint (flake8)
+        shell: bash
+        run: |-
+          cd ${{ inputs.path }}
+          pipenv run flake8 .
+        if: ${{ inputs.flake }}
+      - name: Lint (black)
+        shell: bash
+        run: |-
+          cd ${{ inputs.path }}
+          pipenv run black --check .
+        if: ${{ inputs.black }}
+      - name: Test (run in parallel)
+        shell: bash
+        run: |-
+          cd ${{ inputs.path }}
+          pipenv run coverage run --concurrency=multiprocessing manage.py test --settings=${{ inputs.projectName }}.settings.ci --parallel
+          pipenv run coverage combine
+      - name: Upload Code Coverage
+        shell: bash
+        run: |-
+          ROOT=$(pwd)
+          cd ${{ inputs.path }}
+          pipenv run codecov --root $ROOT --flags ${{ inputs.path }}
+  # container:
+  #     image: python:${{ inputs.pythonVersion }}
