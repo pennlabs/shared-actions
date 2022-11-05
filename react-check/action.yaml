@@ -2,8 +2,7 @@ name: React Project Workflow
 description: "Checks and runs tests for react project"
   
 inputs:
-  # Mandatory inputs
-  # Optional finetuning inputs
+  # Path input is only required if building a project with front and backends
   path:
     required: False
     description: "Path to project root"
