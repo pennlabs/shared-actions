@@ -1,0 +1,47 @@
+name: React Project Workflow
+description: "Checks and runs tests for react project"
+  
+inputs:
+  # Mandatory inputs
+  # Optional finetuning inputs
+  path:
+    required: False
+    description: "Path to project root"
+    default: .
+
+runs:
+  using: composite
+
+  steps:
+    - uses: actions/checkout@v2
+    - name: Cache
+      uses: actions/cache@v2
+      with:
+        path: "**/node_modules"
+        key: v0-${{ hashFiles('${{ inputs.path }}/yarn.lock') }}
+
+    - name: Install Dependencies
+      shell: bash
+      run: |-
+        cd ${{ inputs.path }}
+        yarn install --frozen-lockfile
+    
+    - name: Lint
+      shell: bash
+      run: |-
+        cd ${{ inputs.path }}
+        yarn lint
+    
+    - name: Test
+      shell: bash
+      run: |-
+        cd ${{ inputs.path }}
+        yarn test
+    - name: Upload Code Coverage
+      shell: bash
+      run: |-
+        ROOT=$(pwd)
+        cd ${{ inputs.path }}
+        yarn run codecov -p $ROOT -F frtype=local,src=/tmp/.buildx-cacheontend
+# container:
+#   image: node:${{ inputs.nodeVersion }}
