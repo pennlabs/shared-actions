@@ -1,0 +1,85 @@
+name: "Django Check Composite"
+# description: "Checks django as a composite action"
+on: 
+  workflow_call:
+    inputs:
+          # Mandatory inputs
+          projectName:
+            required: true
+            type: string
+            description: "Name of project"
+          # Optional finetuning inputs
+          path:
+            required: False
+            type: string
+            description: "path"
+            default: .
+          pythonVersion:
+            required: False
+            description: "Python version to use"
+            type: string
+            default: 3.8-buster
+          # Linting config
+          flake:
+            required: False
+            type: boolean
+            description: "whether to use flake for linting"
+            default: "true"
+          black:
+            required: False
+            type: boolean
+            description: "whether to use black for linting"
+            default: "true"
+jobs:
+  check-django:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.local/share/virtualenvs
+          key: v0-${{ hashFiles('${{ inputs.path }}/Pipfile.lock') }}
+      - name: Install Dependencies
+        shell: bash
+        run: |-
+          cd ${{ inputs.path }}
+          pip install pipenv
+          pipenv install --deploy --dev
+      - name: Lint (flake8)
+        shell: bash
+        run: |-
+          cd ${{ inputs.path }}
+          pipenv run flake8 .
+        if: ${{ inputs.flake }}
+      - name: Lint (black)
+        shell: bash
+        run: |-
+          cd ${{ inputs.path }}
+          pipenv run black --check .
+        if: ${{ inputs.black }}
+      - name: Test (run in parallel)
+        shell: bash
+        run: |-
+          cd ${{ inputs.path }}
+          pipenv run coverage run --concurrency=multiprocessing manage.py test --settings=${{ inputs.projectName }}.settings.ci --parallel
+          pipenv run coverage combine
+      - name: Upload Code Coverage
+        shell: bash
+        run: |-
+          ROOT=$(pwd)
+          cd ${{ inputs.path }}
+          pipenv run codecov --root $ROOT --flags ${{ inputs.path }}
+    env:
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/postgres
+    services:
+      postgres:
+        image: postgres:12
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+          POSTGRES_PASSWORD: postgres
+        options: "--health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5"
+    container:
+        image: python:${{ inputs.pythonVersion }}
+  
