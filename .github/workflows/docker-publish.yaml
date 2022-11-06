@@ -60,4 +60,4 @@ jobs:
           push: true
           cache-from: ${{ inputs.cache && 'type=local,src=/tmp/.buildx-cache,type=registry,ref=pennlabs/${{ inputs.imageName }}:latest' }}
           cache-to: ${{ inputs.cache && 'type=local,dest=/tmp/.buildx-cache' }}
-          tags: ${{ inputs.imageName }}:latest,${{ inputs.imageName }}:${{ inputs.gitSha }}
+          tags: pennlabs/${{ inputs.imageName }}:latest,pennlabs/${{ inputs.imageName }}:${{ inputs.gitSha }}
