@@ -24,12 +24,12 @@ on:
             required: False
             type: boolean
             description: "whether to use flake for linting"
-            default: "true"
+            default: true
           black:
             required: False
             type: boolean
             description: "whether to use black for linting"
-            default: "true"
+            default: true
 jobs:
   check-django:
     runs-on: ubuntu-latest
