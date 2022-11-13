@@ -1,0 +1,43 @@
+name: React Project Workflow
+on:
+  workflow_call:
+    inputs:
+      path:
+        required: False
+        type: string
+        default: .
+      nodeVersion:
+        required: False
+        type: string
+        default: 14
+jobs:
+  react-check:
+    name: React Check
+    runs-on: ubuntu-latest
+    if: ${{ !inputs.skipReactCheck }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Cache
+        uses: actions/cache@v2
+        with:
+          path: "**/node_modules"
+          key: v0-${{ hashFiles('${{ inputs.path }}/yarn.lock') }}
+      - name: Install Dependencies
+        run: |-
+          cd ${{ inputs.path }}
+          yarn install --frozen-lockfile
+      - name: Lint
+        run: |-
+          cd ${{ inputs.path }}
+          yarn lint
+      - name: Test
+        run: |-
+          cd ${{ inputs.path }}
+          yarn test
+      - name: Upload Code Coverage
+        run: |-
+          ROOT=$(pwd)
+          cd ${{ inputs.path }}
+          yarn run codecov -p $ROOT -F frtype=local,src=/tmp/.buildx-cacheontend
+    container:
+      image: node:${{ inputs.nodeVersion }}
