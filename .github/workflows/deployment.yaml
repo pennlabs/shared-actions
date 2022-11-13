@@ -19,7 +19,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    if: ${{ inputs.githubRef }} == 'refs/heads/master'
+    if: ${{ inputs.githubRef == 'refs/heads/master' }}
     steps:
       - uses: actions/checkout@v2
       - id: synth
