@@ -18,6 +18,7 @@ on:
         required: true
 jobs:
   deploy:
+    name: Deploy to Kubernetes
     runs-on: ubuntu-latest
     if: ${{ inputs.githubRef == 'refs/heads/master' }}
     steps:
@@ -40,7 +41,7 @@ jobs:
           REPOSITORY: ${{ github.repository }}
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
       - name: Deploy
-        if: steps.synth.outcome == 'success'
+        if: steps.synth.outcome == 'success' && ${{ inputs.githubRef }} == 'refs/heads/master' 
         run: |-
           aws eks --region us-east-1 update-kubeconfig --name production --role-arn arn:aws:iam::${AWS_ACCOUNT_ID}:role/kubectl
 
