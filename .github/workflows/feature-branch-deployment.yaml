@@ -1,0 +1,80 @@
+name: Feature Branch Deployment Workflow
+on:
+  workflow_call:
+    inputs:
+      # Mandatory inputs
+      githubRef:
+        required: true
+        type: string
+      gitSha:
+        required: true
+        type: string
+    secrets:
+      AWS_ACCOUNT_ID:
+        required: true
+      GH_AWS_ACCESS_KEY_ID:
+        required: true
+      GH_AWS_SECRET_ACCESS_KEY:
+        required: true
+jobs:
+  feature-branch-deploy:
+    runs-on: ubuntu-latest
+    if: startsWith(${{ inputs.githubRef }}, 'refs/heads/feat/') == true
+    steps:
+      - uses: actions/checkout@v2
+      - name: Get Pull Request Metadata
+        id: pr
+        run: |-
+          echo "::set-output name=pull_request_number::$(gh pr view --json number -q .number || echo "")"
+          echo "::set-output name=pull_request_closed::$(gh pr view --json closed -q .closed || echo "")"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - id: synth
+        name: Synth cdk8s manifests
+        if: (steps.pr.outputs.pull_request_number) && (steps.pr.outputs.pull_request_closed == 'false')
+        run: |-
+          cd k8s
+          yarn install --frozen-lockfile
+
+          # Get repo name (by removing owner/organization)
+          export DEPLOY_TO_FEATURE_BRANCH=true
+          export RELEASE_NAME=${REPOSITORY#*/}-pr-${{ steps.pr.outputs.pull_request_number }}
+
+          # Export RELEASE_NAME as an output
+          echo "::set-output name=RELEASE_NAME::$RELEASE_NAME"
+
+          yarn build
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.pull_request_number }}
+          GIT_SHA: ${{ inputs.gitSha }}
+          REPOSITORY: ${{ github.repository }}
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      - name: Deploy
+        if: steps.synth.outcome == 'success'
+        run: |-
+          aws eks --region us-east-1 update-kubeconfig --name production --role-arn arn:aws:iam::${AWS_ACCOUNT_ID}:role/kubectl
+          # Get repo name from synth step
+          RELEASE_NAME=${{ steps.synth.outputs.RELEASE_NAME }}
+          # Deploy
+          kubectl apply -f k8s/dist/ -l app.kubernetes.io/component=certificate
+          kubectl apply -f k8s/dist/ --prune -l app.kubernetes.io/part-of=$RELEASE_NAME
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.GH_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.GH_AWS_SECRET_ACCESS_KEY }}
+      - name: Find feature branch complete announcement if exists
+        uses: peter-evans/find-comment@v2
+        id: find-announcement
+        with:
+          issue-number: ${{ steps.pr.outputs.pull_request_number }}
+          body-includes: Deployment preview for
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Announce successful feature branch deployment
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          comment-id: ${{ steps.find-announcement.outputs.comment-id }}
+          issue-number: ${{ steps.pr.outputs.pull_request_number }}
+          edit-mode: replace
+          body: |-
+            Deployment preview for commit `${{ github.sha }}` ready at:
+            [pr-${{ steps.pr.outputs.pull_request_number }}.pennlabs.org](https://pr-${{ steps.pr.outputs.pull_request_number }}.pennlabs.org)
