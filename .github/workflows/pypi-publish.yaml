@@ -1,0 +1,32 @@
+name: PyPi Publish Workflow
+on: 
+  workflow_call:
+    inputs:
+      python-version:
+        required: false
+        type: string
+        default: python:3.8
+    secrets:
+      PYPI_PASSWORD:
+        required: true
+
+jobs:
+  publish:
+      runs-on: ubuntu-latest
+      container:
+        image: python:${{ inputs.pythonVersion }}
+      needs: test
+      if: startsWith(github.ref, 'refs/tags')
+      steps:
+        - uses: actions/checkout@v2
+        - name: Verify tag
+          run: |-
+            GIT_TAG=${GITHUB_REF/refs\/tags\//}
+            LIBRARY_VERSION=$(poetry version -s)
+            if [[ "$GIT_TAG" != LIBRARY_VERSION ]]; then exit 1; fi
+        - name: Build
+          run: poetry build
+        - name: Publish
+          run: poetry publish
+          env:
+            POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_PASSWORD }}
