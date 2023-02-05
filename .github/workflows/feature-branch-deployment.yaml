@@ -29,19 +29,6 @@ jobs:
           echo "::set-output name=pull_request_closed::$(gh pr view --json closed -q .closed || echo "")"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Create Feature Branch Table (on AWS RDS) with PR number
-        if: (steps.pr.outputs.pull_request_number) && (steps.pr.outputs.pull_request_closed == 'false')
-        run: |-
-          # Get repo name (by removing owner/organization)
-          export RELEASE_NAME=${REPOSITORY#*/}-pr-${{ steps.pr.outputs.pull_request_number }}
-          # Create table
-          aws rds-data execute-statement \
-            --resource-arn arn:aws:rds:us-east-1:${AWS_ACCOUNT_ID}:cluster:$RELEASE_NAME \
-            --secret-arn arn:aws:secretsmanager:us-east-1:${AWS_ACCOUNT_ID}:secret:$RELEASE_NAME \
-            --sql "CREATE DATABASE $RELEASE_NAME"
-        env:
-          DATABASE_NAME: staging
-          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
       - id: synth
         name: Synth cdk8s manifests
         if: (steps.pr.outputs.pull_request_number) && (steps.pr.outputs.pull_request_closed == 'false')
@@ -55,6 +42,9 @@ jobs:
 
           # Export RELEASE_NAME as an output
           echo "::set-output name=RELEASE_NAME::$RELEASE_NAME"
+
+          # Get feature branch table name
+          export DATABASE_NAME=${RELEASE_NAME}
 
           yarn build
         env:
