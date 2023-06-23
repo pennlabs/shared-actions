@@ -58,11 +58,5 @@ runs:
           cd ${{ inputs.path }}
           pipenv run coverage run --concurrency=multiprocessing manage.py test --settings=${{ inputs.projectName }}.settings.ci --parallel
           pipenv run coverage combine
-      - name: Upload Code Coverage
-        shell: bash
-        run: |-
-          ROOT=$(pwd)
-          cd ${{ inputs.path }}
-          pipenv run codecov --root $ROOT --flags ${{ inputs.path }}
   # container:
   #     image: python:${{ inputs.pythonVersion }}
