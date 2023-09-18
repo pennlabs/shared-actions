@@ -40,6 +40,12 @@ runs:
           cd ${{ inputs.path }}
           pip install pipenv
           pipenv install --deploy --dev
+      - name: Test (run in parallel)
+        shell: bash
+        run: |-
+          cd ${{ inputs.path }}
+          pipenv run coverage run --concurrency=multiprocessing manage.py test --settings=${{ inputs.projectName }}.settings.ci --parallel
+          pipenv run coverage combine
       - name: Lint (flake8)
         shell: bash
         run: |-
@@ -52,11 +58,5 @@ runs:
           cd ${{ inputs.path }}
           pipenv run black --check .
         if: ${{ inputs.black }}
-      - name: Test (run in parallel)
-        shell: bash
-        run: |-
-          cd ${{ inputs.path }}
-          pipenv run coverage run --concurrency=multiprocessing manage.py test --settings=${{ inputs.projectName }}.settings.ci --parallel
-          pipenv run coverage combine
   # container:
   #     image: python:${{ inputs.pythonVersion }}
