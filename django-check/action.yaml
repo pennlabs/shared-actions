@@ -58,5 +58,5 @@ runs:
           cd ${{ inputs.path }}
           pipenv run black --check . || pipenv run black --diff .
         if: ${{ inputs.black }}
-  # container:
-  #     image: python:${{ inputs.pythonVersion }}
+  container:
+      image: python:${{ inputs.pythonVersion }}
