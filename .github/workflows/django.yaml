@@ -32,7 +32,7 @@ on:
       dependencyManager:
         required: False
         description: "Dependency manager to use (e.g., pipenv, poetry)"
-        default: "pipenv"
+        default: 'pipenv'
 jobs:
   django-check:
     name: Django Check
@@ -50,13 +50,13 @@ jobs:
           cd ${{ inputs.path }}
           pip install pipenv
           pipenv install --deploy --dev
-        if: ${{ inputs.dependencyManager == "pipenv" }}
+        if: ${{ inputs.dependencyManager == 'pipenv' }}
       - name: Install Poetry
         uses: snok/install-poetry@v1
-        if: ${{ inputs.dependencyManager == "poetry" }}
+        if: ${{ inputs.dependencyManager == 'poetry' }}
       - name: Install Dependencies (poetry)
         run: poetry install --no-root
-        if: ${{ inputs.dependencyManager == "poetry" }}
+        if: ${{ inputs.dependencyManager == 'poetry' }}
       - name: Lint (flake8)
         run: |-
           cd ${{ inputs.path }}
