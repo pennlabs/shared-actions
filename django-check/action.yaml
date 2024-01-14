@@ -24,6 +24,11 @@ inputs:
         required: False
         description: "whether to use black for linting"
         default: "true"
+      # Dependency manager config
+      dependencyManager:
+        required: False
+        description: "Dependency manager to use (e.g., pipenv, poetry)"
+        default: "pipenv"
 
 runs:
   using: "composite"
@@ -34,30 +39,42 @@ runs:
         with:
           path: ~/.local/share/virtualenvs
           key: v0-${{ hashFiles('${{ inputs.path }}/Pipfile.lock') }}
-      - name: Install Dependencies
+      - name: Install Dependencies (pipenv)
         shell: bash
         continue-on-error: true
         run: |-
           cd ${{ inputs.path }}
           pip install pipenv
           pipenv install --deploy --dev
+        if: ${{ inputs.dependencyManager == "pipenv" }}
+      - name: Install Dependencies (poetry)
+        shell: bash
+        continue-on-error: true
+        run: |-
+          cd ${{ inputs.path }}
+          export POETRY_HOME=/opt/poetry
+          python3 -m venv $POETRY_HOME
+          $POETRY_HOME/bin/pip install poetry
+          $POETRY_HOME/bin/poetry --version
+          poetry install --no-root
+        if: ${{ inputs.dependencyManager == "poetry" }}
       - name: Test (run in parallel)
         shell: bash
         run: |-
           cd ${{ inputs.path }}
-          pipenv run coverage run --concurrency=multiprocessing manage.py test --settings=${{ inputs.projectName }}.settings.ci --parallel
-          pipenv run coverage combine
+          ${{ inputs.dependencyManager }} run coverage run --concurrency=multiprocessing manage.py test --settings=${{ inputs.projectName }}.settings.ci --parallel
+          ${{ inputs.dependencyManager }} run coverage combine
       - name: Lint (flake8)
         shell: bash
         run: |-
           cd ${{ inputs.path }}
-          pipenv run flake8 .
+          ${{ inputs.dependencyManager }} run flake8 .
         if: ${{ inputs.flake }}
       - name: Lint (black)
         shell: bash
         run: |-
           cd ${{ inputs.path }}
-          pipenv run black --check . || pipenv run black --diff .
+          ${{ inputs.dependencyManager }} run black --check . || ${{ inputs.dependencyManager }} run black --diff .
         if: ${{ inputs.black }}
   container:
       image: python:${{ inputs.pythonVersion }}
