@@ -28,6 +28,11 @@ on:
         required: False
         type: boolean
         default: True
+      # Dependency manager config
+      dependencyManager:
+        required: False
+        description: "Dependency manager to use (e.g., pipenv, poetry)"
+        default: "pipenv"
 jobs:
   django-check:
     name: Django Check
@@ -45,21 +50,28 @@ jobs:
           cd ${{ inputs.path }}
           pip install pipenv
           pipenv install --deploy --dev
+        if: ${{ inputs.dependencyManager == "pipenv" }}
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        if: ${{ inputs.dependencyManager == "poetry" }}
+      - name: Install Dependencies (poetry)
+        run: poetry install --no-root
+        if: ${{ inputs.dependencyManager == "poetry" }}
       - name: Lint (flake8)
         run: |-
           cd ${{ inputs.path }}
-          pipenv run flake8 .
+          ${{ inputs.dependencyManager }} run flake8 .
         if: ${{ inputs.flake }}
       - name: Lint (black)
         run: |-
           cd ${{ inputs.path }}
-          pipenv run black --check .
+          ${{ inputs.dependencyManager }} run black --check .
         if: ${{ inputs.black }}
       - name: Test (run in parallel)
         run: |-
           cd ${{ inputs.path }}
-          pipenv run coverage run --concurrency=multiprocessing manage.py test --settings=${{ inputs.projectName }}.settings.ci --parallel
-          pipenv run coverage combine
+          ${{ inputs.dependencyManager }} run coverage run --concurrency=multiprocessing manage.py test --settings=${{ inputs.projectName }}.settings.ci --parallel
+          ${{ inputs.dependencyManager }} run coverage combine
     container:
       image: python:${{ inputs.pythonVersion }}
     env:
