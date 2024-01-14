@@ -53,8 +53,7 @@ runs:
       - name: Install Dependencies (poetry)
         shell: bash
         continue-on-error: true
-        run:
-          poetry install --no-root
+        run: poetry install --no-root
         if: ${{ inputs.dependencyManager == "poetry" }}
       - name: Test (run in parallel)
         shell: bash
