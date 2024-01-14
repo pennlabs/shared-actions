@@ -46,7 +46,7 @@ jobs:
         with:
           path: ~/.local/share/virtualenvs
           key: v0-${{ hashFiles('${{ inputs.path }}/Pipfile.lock') }}
-      - name: Install Dependencies
+      - name: Install Dependencies (pipenv)
         run: |-
           cd ${{ inputs.path }}
           pip install pipenv
@@ -56,7 +56,9 @@ jobs:
         uses: snok/install-poetry@v1
         if: ${{ inputs.dependencyManager == 'poetry' }}
       - name: Install Dependencies (poetry)
-        run: poetry install --no-root
+        run: |-
+          cd ${{ inputs.path }}
+          poetry install --no-root
         if: ${{ inputs.dependencyManager == 'poetry' }}
       - name: Lint (flake8)
         run: |-
