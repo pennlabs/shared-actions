@@ -31,6 +31,7 @@ on:
       # Dependency manager config
       dependencyManager:
         required: False
+        type: string
         description: "Dependency manager to use (e.g., pipenv, poetry)"
         default: 'pipenv'
 jobs:
