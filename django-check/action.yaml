@@ -81,7 +81,7 @@ runs:
         shell: bash
         run: |-
           cd ${{ inputs.path }}
-          ${{ inputs.dependencyManager }} run ruff check . && (${{ inputs.dependencyManager }} run ruff format --check . || ${{ inputs.dependencyManager }} run ruff format --diff .
+          ${{ inputs.dependencyManager }} run ruff check . && ${{ inputs.dependencyManager }} run ruff format --check . || ${{ inputs.dependencyManager }} run ruff format --diff .
         if: ${{ inputs.ruff }}
   container:
       image: python:${{ inputs.pythonVersion }}

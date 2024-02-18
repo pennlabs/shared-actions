@@ -77,7 +77,7 @@ jobs:
       - name: Lint (ruff)
         run: |-
           cd ${{ inputs.path }}
-          ${{ inputs.dependencyManager }} run ruff check . && (${{ inputs.dependencyManager }} run ruff format --check . || ${{ inputs.dependencyManager }} run ruff format --diff .
+          ${{ inputs.dependencyManager }} run ruff check . && ${{ inputs.dependencyManager }} run ruff format --check . || ${{ inputs.dependencyManager }} run ruff format --diff .
         if: ${{ inputs.ruff }}
       - name: Test (run in parallel)
         run: |-
