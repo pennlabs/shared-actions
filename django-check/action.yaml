@@ -24,6 +24,10 @@ inputs:
         required: False
         description: "whether to use black for linting"
         default: "true"
+      ruff:
+        required: False
+        description: "whether to use ruff for linting"
+        default: "false"
       # Dependency manager config
       dependencyManager:
         required: False
@@ -73,5 +77,11 @@ runs:
           cd ${{ inputs.path }}
           ${{ inputs.dependencyManager }} run black --check . || ${{ inputs.dependencyManager }} run black --diff .
         if: ${{ inputs.black }}
+      - name: Lint (ruff)
+        shell: bash
+        run: |-
+          cd ${{ inputs.path }}
+          ${{ inputs.dependencyManager }} run ruff check . && (${{ inputs.dependencyManager }} run ruff format --check . || ${{ inputs.dependencyManager }} run ruff format --diff .
+        if: ${{ inputs.ruff }}
   container:
       image: python:${{ inputs.pythonVersion }}
