@@ -28,6 +28,10 @@ on:
         required: False
         type: boolean
         default: True
+      ruff:
+        required: False
+        type: boolean
+        default: False
       # Dependency manager config
       dependencyManager:
         required: False
@@ -70,6 +74,11 @@ jobs:
           cd ${{ inputs.path }}
           ${{ inputs.dependencyManager }} run black --check .
         if: ${{ inputs.black }}
+      - name: Lint (ruff)
+        run: |-
+          cd ${{ inputs.path }}
+          ${{ inputs.dependencyManager }} run ruff check . && (${{ inputs.dependencyManager }} run ruff format --check . || ${{ inputs.dependencyManager }} run ruff format --diff .
+        if: ${{ inputs.ruff }}
       - name: Test (run in parallel)
         run: |-
           cd ${{ inputs.path }}
