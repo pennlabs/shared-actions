@@ -84,6 +84,16 @@ jobs:
           cd ${{ inputs.path }}
           ${{ inputs.dependencyManager }} run coverage run --concurrency=multiprocessing manage.py test --settings=${{ inputs.projectName }}.settings.ci --parallel
           ${{ inputs.dependencyManager }} run coverage combine
+          ${{ inputs.dependencyManager }} run coverage xml
+      - name: Upload Code Coverage
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ${{ inputs.path }}
+          fail_ci_if_error: true
+          files: coverage.xml
+          name: codecov-umbrella
+          verbose: true
     container:
       image: python:${{ inputs.pythonVersion }}
     env:
