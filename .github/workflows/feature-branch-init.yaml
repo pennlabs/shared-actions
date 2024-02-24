@@ -1,0 +1,44 @@
+name: Feature Branch Init Workflow (Called on PR Open)
+on:
+  workflow_call:
+    inputs:
+      # Mandatory inputs
+      githubRef:
+        required: true
+        type: string
+      gitSha:
+        required: true
+        type: string
+    secrets:
+      AWS_ACCOUNT_ID:
+        required: true
+      GH_AWS_ACCESS_KEY_ID:
+        required: true
+      GH_AWS_SECRET_ACCESS_KEY:
+        required: true
+jobs:
+  feature-branch-init:
+    runs-on: ubuntu-latest
+    if: startsWith(${{ inputs.githubRef }}, 'refs/heads/feat/') == true
+    steps:
+      - uses: actions/checkout@v2
+      - name: Get Pull Request Metadata
+        id: pr
+        run: |-
+          echo "::set-output name=pull_request_number::$(gh pr view --json number -q .number || echo "")"
+          echo "::set-output name=pull_request_closed::$(gh pr view --json closed -q .closed || echo "")"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Feature Branch Table (on AWS RDS) with PR number
+        if: (steps.pr.outputs.pull_request_number) && (steps.pr.outputs.pull_request_closed == 'false')
+        run: |-
+          # Get repo name (by removing owner/organization)
+          export RELEASE_NAME=${REPOSITORY#*/}-pr-${{ steps.pr.outputs.pull_request_number }}
+          # Create table
+          aws rds-data execute-statement \
+            --resource-arn arn:aws:rds:us-east-1:${AWS_ACCOUNT_ID}:cluster:$RELEASE_NAME \
+            --secret-arn arn:aws:secretsmanager:us-east-1:${AWS_ACCOUNT_ID}:secret:$RELEASE_NAME \
+            --sql "CREATE DATABASE $RELEASE_NAME"
+        env:
+          DATABASE_NAME: staging
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
