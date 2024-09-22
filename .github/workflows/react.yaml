@@ -59,10 +59,13 @@ jobs:
           cd ${{ inputs.path }}
           yarn test
       - name: Upload Code Coverage
-        run: |-
-          ROOT=$(pwd)
-          cd ${{ inputs.path }}
-          yarn run codecov -p $ROOT -F frtype=local,src=/tmp/.buildx-cacheontend
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ${{ inputs.path }}
+          fail_ci_if_error: true
+          name: codecov-umbrella
+          verbose: true
     container:
       image: node:${{ inputs.nodeVersion }}
   publish-frontend:
