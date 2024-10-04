@@ -29,6 +29,10 @@ on:
         required: False
         type: string
         default: 14
+      skipCodecov:
+        required: False
+        type: boolean
+        default: false
     secrets:
       DOCKER_USERNAME:
         required: true
@@ -60,6 +64,7 @@ jobs:
           yarn test
       - name: Upload Code Coverage
         uses: codecov/codecov-action@v3
+        if: ${{ !inputs.skipCodecov }}
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ${{ inputs.path }}
