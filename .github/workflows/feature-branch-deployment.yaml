@@ -45,6 +45,9 @@ jobs:
           # Export RELEASE_NAME as an output
           echo "RELEASE_NAME=$RELEASE_NAME" >> $GITHUB_OUTPUT
 
+          # Get feature branch table name
+          export DATABASE_NAME=${RELEASE_NAME}
+
           yarn build
         env:
           PR_NUMBER: ${{ steps.pr.outputs.pull_request_number }}
