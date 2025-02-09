@@ -51,7 +51,7 @@ jobs:
           RESOURCES=$(kubectl api-resources --verbs=list -o name | grep -v -E 'certificates|certificaterequests|certificatesigningrequests' | tr '\n' ',' | sed 's/,$//')
 
           # Deploy with pruning and allowed resource types
-          kubectl apply -f k8s/dist/ --prune -l app.kubernetes.io/part-of=$RELEASE_NAME --prune-allowlist=$RESOURCES
+          kubectl apply -f k8s/dist/ --prune -l app.kubernetes.io/part-of=$RELEASE_NAME
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           AWS_ACCESS_KEY_ID: ${{ secrets.GH_AWS_ACCESS_KEY_ID }}
