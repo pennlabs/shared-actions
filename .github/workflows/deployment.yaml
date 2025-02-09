@@ -47,9 +47,11 @@ jobs:
           # Get repo name from synth step
           RELEASE_NAME=${{ steps.synth.outputs.RELEASE_NAME }}
 
-          # Deploy
-          kubectl apply -f k8s/dist/ -l app.kubernetes.io/component=certificate
-          kubectl apply -f k8s/dist/ --prune -l app.kubernetes.io/part-of=$RELEASE_NAME
+          # Get list of all resource types, excluding certificate-related resources
+          RESOURCES=$(kubectl api-resources --verbs=list -o name | grep -v -E 'certificates|certificaterequests|certificatesigningrequests' | tr '\n' ',' | sed 's/,$//')
+
+          # Deploy with pruning and allowed resource types
+          kubectl apply -f k8s/dist/ --prune -l app.kubernetes.io/part-of=$RELEASE_NAME --prune-allowlist=$RESOURCES
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           AWS_ACCESS_KEY_ID: ${{ secrets.GH_AWS_ACCESS_KEY_ID }}
