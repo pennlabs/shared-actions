@@ -70,18 +70,18 @@ runs:
       run: |-
         cd ${{ inputs.path }}
         ${{ inputs.dependencyManager }} run flake8 .
-      if: ${{ inputs.flake == 'true' }}
+      if: ${{ inputs.flake }}
     - name: Lint (black)
       shell: bash
       run: |-
         cd ${{ inputs.path }}
         ${{ inputs.dependencyManager }} run black --check . || ${{ inputs.dependencyManager }} run black --diff .
-      if: ${{ inputs.black == 'true' }}
+      if: ${{ inputs.black }}
     - name: Lint (ruff)
       shell: bash
       run: |-
         cd ${{ inputs.path }}
         ${{ inputs.dependencyManager }} run ruff check . && ${{ inputs.dependencyManager }} run ruff format --check . || ${{ inputs.dependencyManager }} run ruff format --diff .
-      if: ${{ inputs.ruff == 'true' }}
+      if: ${{ inputs.ruff }}
   container:
     image: python:${{ inputs.pythonVersion }}
