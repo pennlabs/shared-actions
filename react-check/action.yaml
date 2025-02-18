@@ -3,14 +3,13 @@ description: "Checks and runs tests for react project"
   
 inputs:
   # Path input is only required if building a project with front and backends
-
   path:
-    required: False
+    required: false
     description: "Path to project root"
     default: .
 
   nodeVersion:
-    required: False
+    required: false
     description: "Node version to use"
     default: 14.17.0
 
@@ -18,14 +17,14 @@ runs:
   using: composite
 
   steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Setup Node ${{ inputs.nodeVersion }}
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.nodeVersion }}
         cache: "yarn"
     - name: Cache
-      uses: actions/cache@v2
+      uses: actions/cache@v4
       with:
         path: "**/node_modules"
         key: v0-${{ hashFiles('${{ inputs.path }}/yarn.lock') }}
@@ -52,6 +51,6 @@ runs:
       run: |-
         ROOT=$(pwd)
         cd ${{ inputs.path }}
-        yarn run codecov -p $ROOT -F frtype=local,src=/tmp/.buildx-cacheontend
+        yarn run codecov -p $ROOT -F frtype=local,src=/tmp/.buildx-cache
 # container:
 #   image: node:${{ inputs.nodeVersion }}

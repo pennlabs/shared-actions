@@ -2,86 +2,86 @@ name: "Django Check Composite"
 description: "Checks django as a composite action"
 
 inputs:
-      # Mandatory inputs
-      projectName:
-        required: true
-        description: "Name of project"
-      # Optional finetuning inputs
-      path:
-        required: False
-        description: "path"
-        default: .
-      pythonVersion:
-        required: False
-        description: "Python version to use"
-        default: 3.8-buster
-      # Linting config
-      flake:
-        required: False
-        description: "whether to use flake for linting"
-        default: "true"
-      black:
-        required: False
-        description: "whether to use black for linting"
-        default: "true"
-      ruff:
-        required: False
-        description: "whether to use ruff for linting"
-        default: "false"
-      # Dependency manager config
-      dependencyManager:
-        required: False
-        description: "Dependency manager to use (e.g., pipenv, poetry)"
-        default: 'pipenv'
+  # Mandatory inputs
+  projectName:
+    required: true
+    description: "Name of project"
+  # Optional finetuning inputs
+  path:
+    required: false
+    description: "path"
+    default: .
+  pythonVersion:
+    required: false
+    description: "Python version to use"
+    default: 3.8-buster
+  # Linting config
+  flake:
+    required: false
+    description: "whether to use flake for linting"
+    default: "true"
+  black:
+    required: false
+    description: "whether to use black for linting"
+    default: "true"
+  ruff:
+    required: false
+    description: "whether to use ruff for linting"
+    default: "false"
+  # Dependency manager config
+  dependencyManager:
+    required: false
+    description: "Dependency manager to use (e.g., pipenv, poetry)"
+    default: "pipenv"
 
 runs:
   using: "composite"
   steps:
-      - uses: actions/checkout@v2
-      - name: Cache
-        uses: actions/cache@v2
-        with:
-          path: ~/.local/share/virtualenvs
-          key: v0-${{ hashFiles('${{ inputs.path }}/Pipfile.lock') }}
-      - name: Install Dependencies (pipenv)
-        shell: bash
-        continue-on-error: true
-        run: |-
-          cd ${{ inputs.path }}
-          pip install pipenv
-          pipenv install --deploy --dev
-        if: ${{ inputs.dependencyManager == 'pipenv' }}
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        if: ${{ inputs.dependencyManager == 'poetry' }}
-      - name: Install Dependencies (poetry)
-        shell: bash
-        continue-on-error: true
-        run: poetry install --no-root
-        if: ${{ inputs.dependencyManager == 'poetry' }}
-      - name: Test (run in parallel)
-        shell: bash
-        run: |-
-          cd ${{ inputs.path }}
-          ${{ inputs.dependencyManager }} run coverage run --concurrency=multiprocessing manage.py test --settings=${{ inputs.projectName }}.settings.ci --parallel
-          ${{ inputs.dependencyManager }} run coverage combine
-      - name: Lint (flake8)
-        shell: bash
-        run: |-
-          cd ${{ inputs.path }}
-          ${{ inputs.dependencyManager }} run flake8 .
-        if: ${{ inputs.flake }}
-      - name: Lint (black)
-        shell: bash
-        run: |-
-          cd ${{ inputs.path }}
-          ${{ inputs.dependencyManager }} run black --check . || ${{ inputs.dependencyManager }} run black --diff .
-        if: ${{ inputs.black }}
-      - name: Lint (ruff)
-        shell: bash
-        run: |-
-          cd ${{ inputs.path }}
-          ${{ inputs.dependencyManager }} run ruff check . && ${{ inputs.dependencyManager }} run ruff format --check . || ${{ inputs.dependencyManager }} run ruff format --diff .
-        if: ${{ inputs.ruff }}
+    - uses: actions/checkout@v4
+    - name: Cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.local/share/virtualenvs
+        key: v0-${{ hashFiles('${{ inputs.path }}/Pipfile.lock') }}
+    - name: Install Dependencies (pipenv)
+      shell: bash
+      continue-on-error: true
+      run: |-
+        cd ${{ inputs.path }}
+        pip install pipenv
+        pipenv install --deploy --dev
+      if: ${{ inputs.dependencyManager == 'pipenv' }}
+    - name: Install Poetry
+      uses: snok/install-poetry@v1.3
+      if: ${{ inputs.dependencyManager == 'poetry' }}
+    - name: Install Dependencies (poetry)
+      shell: bash
+      continue-on-error: true
+      run: poetry install --no-root
+      if: ${{ inputs.dependencyManager == 'poetry' }}
+    - name: Test (run in parallel)
+      shell: bash
+      run: |-
+        cd ${{ inputs.path }}
+        ${{ inputs.dependencyManager }} run coverage run --concurrency=multiprocessing manage.py test --settings=${{ inputs.projectName }}.settings.ci --parallel
+        ${{ inputs.dependencyManager }} run coverage combine
+    - name: Lint (flake8)
+      shell: bash
+      run: |-
+        cd ${{ inputs.path }}
+        ${{ inputs.dependencyManager }} run flake8 .
+      if: ${{ inputs.flake == 'true' }}
+    - name: Lint (black)
+      shell: bash
+      run: |-
+        cd ${{ inputs.path }}
+        ${{ inputs.dependencyManager }} run black --check . || ${{ inputs.dependencyManager }} run black --diff .
+      if: ${{ inputs.black == 'true' }}
+    - name: Lint (ruff)
+      shell: bash
+      run: |-
+        cd ${{ inputs.path }}
+        ${{ inputs.dependencyManager }} run ruff check . && ${{ inputs.dependencyManager }} run ruff format --check . || ${{ inputs.dependencyManager }} run ruff format --diff .
+      if: ${{ inputs.ruff == 'true' }}
   container:
-      image: python:${{ inputs.pythonVersion }}
+    image: python:${{ inputs.pythonVersion }}
