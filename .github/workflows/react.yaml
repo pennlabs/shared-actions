@@ -25,6 +25,10 @@ on:
         required: false
         type: boolean
         default: false
+      skipReactPublish:
+        required: false
+        type: boolean
+        default: false
       nodeVersion:
         required: false
         type: string
@@ -79,7 +83,8 @@ jobs:
     needs: react-check
     if: |
       always() &&
-      (needs.react-check.result == 'success' || needs.react-check.result == 'skipped')
+      (needs.react-check.result == 'success' || needs.react-check.result == 'skipped') &&
+      !inputs.skipReactPublish
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-qemu-action@v1
