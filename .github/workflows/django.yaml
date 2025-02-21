@@ -18,7 +18,7 @@ on:
       pythonVersion:
         required: False
         type: string
-        default: 3.11-bookworm
+        default: 3.8-buster
       # Linting config
       flake:
         required: False
