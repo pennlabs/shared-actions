@@ -32,6 +32,10 @@ on:
         required: False
         type: boolean
         default: False
+      codeCoverage:
+        required: false
+        type: boolean
+        default: true
       # Dependency manager config
       dependencyManager:
         required: False
@@ -97,6 +101,7 @@ jobs:
           ${{ inputs.dependencyManager }} run coverage xml
       - name: Upload Code Coverage
         uses: codecov/codecov-action@v3
+        if: ${{ inputs.codeCoverage }}
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ${{ inputs.path }}
