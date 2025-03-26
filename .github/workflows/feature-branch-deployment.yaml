@@ -57,7 +57,9 @@ jobs:
           aws eks --region us-east-1 update-kubeconfig --name production --role-arn arn:aws:iam::${AWS_ACCOUNT_ID}:role/kubectl
           # Get repo name from synth step
           RELEASE_NAME=${{ steps.synth.outputs.RELEASE_NAME }}
-          # Deploy
+          # Get list of all resource types, excluding certificate-related resources
+          RESOURCES=$(kubectl api-resources --verbs=list -o name | grep -v -E 'certificates|certificaterequests|certificatesigningrequests' | tr '\n' ',' | sed 's/,$//')
+          # Deploy with pruning and allowed resource types
           kubectl apply -f k8s/dist/ --prune -l app.kubernetes.io/part-of=$RELEASE_NAME
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
