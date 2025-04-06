@@ -32,6 +32,10 @@ on:
         required: false
         type: boolean
         default: false
+      codeCoverage:
+        required: false
+        type: boolean
+        default: true
       # Dependency manager config
       dependencyManager:
         required: false
@@ -64,6 +68,16 @@ jobs:
           cd ${{ inputs.path }}
           poetry install --no-root
         if: ${{ inputs.dependencyManager == 'poetry' }}
+      - name: Install uv
+        if: ${{ inputs.dependencyManager == 'uv' }}
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.6.0"
+      - name: Install Dependencies (uv)
+        if: ${{ inputs.dependencyManager == 'uv' }}
+        run: |-
+          cd backend
+          uv sync
       - name: Lint (flake8)
         run: |-
           cd ${{ inputs.path }}
@@ -87,6 +101,7 @@ jobs:
           ${{ inputs.dependencyManager }} run coverage xml
       - name: Upload Code Coverage
         uses: codecov/codecov-action@v4
+        if: ${{ inputs.codeCoverage }}
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ${{ inputs.path }}
