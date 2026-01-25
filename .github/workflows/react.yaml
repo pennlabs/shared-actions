@@ -37,6 +37,11 @@ on:
         required: false
         type: boolean
         default: false
+      packageManager:
+        required: false
+        type: string
+        description: "Package manager to use"
+        default: "yarn"
     secrets:
       DOCKER_USERNAME:
         required: true
@@ -49,23 +54,53 @@ jobs:
     if: ${{ !inputs.skipReactCheck }}
     steps:
       - uses: actions/checkout@v4
-      - name: Cache
+
+      # pnpm setup
+      - name: Install pnpm
+        if: ${{ inputs.packageManager == 'pnpm' }}
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+
+      # yarn cache
+      - name: Cache (yarn)
         uses: actions/cache@v4
+        if: ${{ inputs.packageManager == 'yarn' }}
         with:
           path: "**/node_modules"
-          key: v0-${{ hashFiles('${{ inputs.path }}/yarn.lock') }}
-      - name: Install Dependencies
+          key: yarn-${{ hashFiles('${{ inputs.path }}/yarn.lock') }}
+      # pnpm cache
+      - name: Cache (pnpm)
+        uses: actions/cache@v4
+        if: ${{ inputs.packageManager == 'pnpm' }}
+        with:
+          path: |
+            ~/.pnpm-store
+            ${{ inputs.path }}/node_modules
+          key: pnpm-${{ hashFiles('${{ inputs.path }}/pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-
+
+      # yarn install dependencies
+      - name: Install Dependencies (yarn)
+        if: ${{ inputs.packageManager == 'yarn' }}
         run: |-
           cd ${{ inputs.path }}
           yarn install --frozen-lockfile
+      # pnpm install dependencies
+      - name: Install Dependencies (pnpm)
+        if: ${{ inputs.packageManager == 'pnpm' }}
+        run: |-
+          cd ${{ inputs.path }}
+          pnpm install --frozen-lockfile
       - name: Lint
         run: |-
           cd ${{ inputs.path }}
-          yarn lint
+          ${{ inputs.packageManager }} lint
       - name: Test
         run: |-
           cd ${{ inputs.path }}
-          yarn test
+          ${{ inputs.packageManager }} test
       - name: Upload Code Coverage
         uses: codecov/codecov-action@v4
         if: ${{ !inputs.skipCodecov }}
