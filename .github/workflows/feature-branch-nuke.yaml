@@ -44,7 +44,15 @@ jobs:
           GIT_SHA: ${{ inputs.gitSha }}
           REPOSITORY: ${{ github.repository }}
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-      - name: Nuke
+      - name: Nuke Database Feature Branch Database (on AWS RDS) with PR number.
+        run: |-
+          export RELEASE_NAME=${{ steps.synth.outputs.RELEASE_NAME }}
+          # Create table
+          aws rds-data execute-statement \
+            --resource-arn arn:aws:rds:us-east-1:${AWS_ACCOUNT_ID}:cluster:$RELEASE_NAME \
+            --secret-arn arn:aws:secretsmanager:us-east-1:${AWS_ACCOUNT_ID}:secret:$RELEASE_NAME \
+            --sql "DROP DATABASE $RELEASE_NAME" 
+      - name: Nuke Deployment
         run: |-
           aws eks --region us-east-1 update-kubeconfig --name production --role-arn arn:aws:iam::${AWS_ACCOUNT_ID}:role/kubectl
           # Get repo name from synth step
