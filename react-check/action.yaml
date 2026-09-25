@@ -27,7 +27,7 @@ runs:
       uses: actions/cache@v4
       with:
         path: "**/node_modules"
-        key: v0-${{ hashFiles('${{ inputs.path }}/yarn.lock') }}
+        key: v0-${{ runner.os }}-node${{ inputs.nodeVersion }}-yarn-${{ hashFiles(format('{0}/yarn.lock', inputs.path)) }}
 
     - name: Install Dependencies
       shell: bash

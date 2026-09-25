@@ -42,7 +42,7 @@ runs:
       uses: actions/cache@v4
       with:
         path: ~/.local/share/virtualenvs
-        key: v0-${{ hashFiles('${{ inputs.path }}/Pipfile.lock') }}
+        key: v0-${{ runner.os }}-py${{ inputs.pythonVersion }}-pipenv-${{ hashFiles(format('{0}/Pipfile.lock', inputs.path)) }}
     - name: Install Dependencies (pipenv)
       shell: bash
       continue-on-error: true

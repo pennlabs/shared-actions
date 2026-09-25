@@ -57,6 +57,8 @@ jobs:
           context: ${{ inputs.path }}
           file: ${{ inputs.path }}/${{ inputs.dockerfile }}
           push: ${{ inputs.githubRef == 'refs/heads/master' }}
-          cache-from: ${{ inputs.cache && 'type=local,src=/tmp/.buildx-cache,type=registry,ref=pennlabs/${{ inputs.imageName }}:latest' }}
-          cache-to: ${{ inputs.cache && 'type=local,dest=/tmp/.buildx-cache' }}
+          cache-from: |
+            ${{ inputs.cache && 'type=local,src=/tmp/.buildx-cache' || '' }}
+            ${{ inputs.cache && format('type=registry,ref=pennlabs/{0}:latest', inputs.imageName) || '' }}
+          cache-to: ${{ inputs.cache && 'type=local,dest=/tmp/.buildx-cache' || '' }}
           tags: pennlabs/${{ inputs.imageName }}:latest,pennlabs/${{ inputs.imageName }}:${{ inputs.gitSha }}
